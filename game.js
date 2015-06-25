@@ -17,7 +17,7 @@ function create() {
     game.physics.enable(ball, Phaser.Physics.ARCADE);
     ball.anchor.set(0.5,0.5);
     ball.checkWorldBounds = true;
-    ball.body.velocity.setTo(250, 250);
+    ball.body.velocity.setTo(350, 350);
     ball.body.collideWorldBounds = true;
     ball.body.bounce.set(1,1);
     ball.events.onOutOfBounds.add(ballLost, this);
@@ -46,10 +46,36 @@ function ballLost() {
     game.state.restart();
 }
 
+function ballHitPaddle(_ball, _paddle) {
+    var diff = 0;
+
+    if (_ball.x < _paddle.x)
+    {
+        //  Ball is on the left-hand side of the paddle
+        diff = _paddle.x - _ball.x;
+        _ball.body.velocity.x = (-10 * diff);
+    }
+    else if (_ball.x > _paddle.x)
+    {
+        //  Ball is on the right-hand side of the paddle
+        diff = _ball.x -_paddle.x;
+        _ball.body.velocity.x = (10 * diff);
+    }
+    else
+    {
+        //  Ball is perfectly in the middle
+        //  Add a little random X to stop it bouncing straight up!
+        _ball.body.velocity.x = 2 + Math.random() * 8;
+    }
+}
+
 function update() {
-    game.physics.arcade.collide(paddle1, ball);
-    game.physics.arcade.collide(paddle2, ball);
-    paddle2.y = ball.y;
+    game.physics.arcade.collide(ball, paddle1, ballHitPaddle, null, this );
+    game.physics.arcade.collide(ball, paddle2, ballHitPaddle, null, this );
+    if (ball.y > 40 && ball.y < 440) {
+        paddle2.y = ball.y;
+        paddle1.y = ball.y;
+    }
 
     if (cursors.left.isDown)
     {
